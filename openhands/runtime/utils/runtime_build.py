@@ -315,6 +315,7 @@ def get_hash_for_lock_files(base_image: str):
             # See https://github.com/zchn/OpenHands/blob/0c15d3383d7e0b1c2a16bbd7b54f3cb0a416b219/.github/workflows/openhands-resolver.yml#L215C63-L215C66
             # and https://github.com/zchn/OpenHands/blob/0c15d3383d7e0b1c2a16bbd7b54f3cb0a416b219/build.sh#L4
             md5.update(os.popen('pip freeze --all').read().encode('utf-8'))
+            continue
         with open(src, 'rb') as f:
             for chunk in iter(lambda: f.read(4096), b''):
                 md5.update(chunk)
