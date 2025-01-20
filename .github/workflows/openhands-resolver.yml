@@ -238,7 +238,7 @@ jobs:
           LLM_API_VERSION: ${{ inputs.LLM_API_VERSION }}
           PYTHONPATH: ""
         run: |
-          cd /tmp && python -m openhands.resolver.resolve_issue \
+          cd /tmp && DEBUG=1 python -m openhands.resolver.resolve_issue \
             --repo ${{ github.repository }} \
             --issue-number ${{ env.ISSUE_NUMBER }} \
             --issue-type ${{ env.ISSUE_TYPE }} \
