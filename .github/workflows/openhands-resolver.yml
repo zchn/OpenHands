@@ -238,7 +238,7 @@ jobs:
           LLM_API_VERSION: ${{ inputs.LLM_API_VERSION }}
           PYTHONPATH: ""
         run: |
-          cd /tmp && DEBUG=1 python -m openhands.resolver.resolve_issue \
+          cd /tmp && env DEBUG=1 LOG_DIR=/tmp/logs python -m openhands.resolver.resolve_issue \
             --repo ${{ github.repository }} \
             --issue-number ${{ env.ISSUE_NUMBER }} \
             --issue-type ${{ env.ISSUE_TYPE }} \
@@ -261,6 +261,14 @@ jobs:
         with:
           name: resolver-output
           path: /tmp/output/output.jsonl
+          retention-days: 30 # Keep the artifact for 30 days
+
+      - name: Upload logs as artifact
+        uses: actions/upload-artifact@v4
+        if: always() # Upload even if the previous steps fail
+        with:
+          name: resolver-output
+          path: /tmp/logs/
           retention-days: 30 # Keep the artifact for 30 days
 
       - name: Create draft PR or push branch
