@@ -267,7 +267,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always() # Upload even if the previous steps fail
         with:
-          name: resolver-output
+          name: resolver-logs
           path: /opt/hostedtoolcache/Python/*/*/lib/*/site-packages/logs/llm/
           retention-days: 30 # Keep the artifact for 30 days
 
