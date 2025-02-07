@@ -22,8 +22,13 @@ async def get_trajectory(request: Request):
         events.
     """
     try:
+        filter_hidden = True
+        if hasattr(request, 'query_params') and 'filter_hidden' in request.query_params:
+            filter_hidden = request.query_params['filter_hidden'].lower() == 'true'
+
         async_stream = AsyncEventStreamWrapper(
-            request.state.conversation.event_stream, filter_hidden=True
+            request.state.conversation.event_stream,
+            filter_hidden=filter_hidden,
         )
         trajectory = []
         async for event in async_stream:

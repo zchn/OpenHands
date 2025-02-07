@@ -107,3 +107,13 @@ class Event:
     @tool_call_metadata.setter
     def tool_call_metadata(self, value: ToolCallMetadata) -> None:
         self._tool_call_metadata = value
+
+    @property
+    def hidden(self) -> bool:
+        if hasattr(self, '_hidden'):
+            return self._hidden  # type: ignore[attr-defined]
+        return False
+
+    @hidden.setter
+    def hidden(self, value: bool) -> None:
+        self._hidden = value

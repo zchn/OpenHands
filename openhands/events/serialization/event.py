@@ -20,8 +20,9 @@ TOP_KEYS = [
     'action',
     'observation',
     'tool_call_metadata',
+    'hidden',
 ]
-UNDERSCORE_KEYS = ['id', 'timestamp', 'source', 'cause', 'tool_call_metadata']
+UNDERSCORE_KEYS = ['id', 'timestamp', 'source', 'cause', 'tool_call_metadata', 'hidden']
 
 DELETE_FROM_TRAJECTORY_EXTRAS = {
     'screenshot',
