@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openhands-backend
+  labels:
+    app: openhands
+    component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openhands
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: openhands
+        component: backend
+    spec:
+      containers:
+      - name: backend
+        image: openhands-backend:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "3000"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openhands-backend-service
+  labels:
+    app: openhands
+    component: backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: openhands
+    component: backend
