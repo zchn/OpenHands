@@ -19,7 +19,9 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: openhands-frontend:latest
+        image: docker.all-hands.dev/all-hands-ai/openhands:0.23
+        command: ["npm", "run", "dev", "--", "--port", "3001", "--host", "0.0.0.0"]
+        workingDir: /app/frontend
         ports:
         - containerPort: 3001
         env:
