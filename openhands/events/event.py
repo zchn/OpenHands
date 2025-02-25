@@ -1,9 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import List
 
 from openhands.events.tool import ToolCallMetadata
 from openhands.llm.metrics import Metrics
+
+
+@dataclass
+class ParentEvent:
+    id: int
+    method: str
 
 
 class EventSource(str, Enum):
@@ -107,3 +114,13 @@ class Event:
     @tool_call_metadata.setter
     def tool_call_metadata(self, value: ToolCallMetadata) -> None:
         self._tool_call_metadata = value
+
+    @property
+    def parents(self) -> List[ParentEvent] | None:
+        if hasattr(self, '_parents'):
+            return self._parents  # type: ignore[attr-defined]
+        return None
+
+    @parents.setter
+    def parents(self, value: List[ParentEvent]) -> None:
+        self._parents = value
