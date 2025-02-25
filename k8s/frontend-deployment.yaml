@@ -19,16 +19,21 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: docker.all-hands.dev/all-hands-ai/openhands:0.23
-        command: ["npm", "run", "dev", "--", "--port", "3001", "--host", "0.0.0.0"]
+        image: ghcr.io/all-hands-ai/openhands:main
+        command: ["npm", "run", "dev", "--", "--port", "12000", "--host", "0.0.0.0"]
         workingDir: /app/frontend
         ports:
-        - containerPort: 3001
+        - containerPort: 12000
+        - containerPort: 12001
         env:
         - name: VITE_BACKEND_HOST
-          value: "openhands-backend-service:3000"
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: VITE_BACKEND_PORT
+          value: "12000"  # Will be 12000 for work-1 and 12001 for work-2
         - name: VITE_FRONTEND_PORT
-          value: "3001"
+          value: "12000"  # Will be 12000 for work-1 and 12001 for work-2
         - name: HOST
           value: "0.0.0.0"
         resources:
@@ -49,10 +54,14 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 3001
-    targetPort: 3001
+  - port: 12000
+    targetPort: 12000
     protocol: TCP
-    name: http
+    name: http-work1
+  - port: 12001
+    targetPort: 12001
+    protocol: TCP
+    name: http-work2
   selector:
     app: openhands
     component: frontend

@@ -1,77 +1,74 @@
-# OpenHands Kubernetes Configurations
+# OpenHands Kubernetes Deployment
 
-This directory contains Kubernetes configurations for deploying OpenHands in a Kubernetes cluster.
+This directory contains Kubernetes configurations for deploying OpenHands in a production environment.
+
+## Overview
+
+OpenHands uses a single Docker image `ghcr.io/all-hands-ai/openhands:main` that contains both the frontend and backend code. The image is built and published automatically via GitHub Actions when changes are merged to the main branch.
+
+## Deployment Configuration
+
+The deployment is configured to work with two runtime environments:
+
+1. **work-1** environment:
+   - Host: work-1-abdcoxuzwicybucg.prod-runtime.all-hands.dev
+   - Port: 12000
+
+2. **work-2** environment:
+   - Host: work-2-abdcoxuzwicybucg.prod-runtime.all-hands.dev
+   - Port: 12001
 
 ## Components
 
-1. **Backend Deployment & Service** (`backend-deployment.yaml`)
-   - Deploys the OpenHands backend server
-   - Exposes port 3000
-   - Uses ClusterIP service type
-   - Resource limits:
-     - Memory: 512Mi-1Gi
-     - CPU: 250m-500m
+### Frontend Service
+- React/Vite application serving the web UI
+- Runs on ports 12000/12001 (work-1/work-2)
+- Environment variables configured for backend communication
+- CORS and iframe access enabled
+- Resource limits:
+  - Memory: 512Mi (limit), 256Mi (request)
+  - CPU: 200m (limit), 100m (request)
 
-2. **Frontend Deployment & Service** (`frontend-deployment.yaml`)
-   - Deploys the OpenHands frontend server
-   - Exposes port 3001
-   - Uses ClusterIP service type
-   - Resource limits:
-     - Memory: 256Mi-512Mi
-     - CPU: 100m-200m
+### Backend Service
+- FastAPI server providing API endpoints
+- Runs on ports 12000/12001 (work-1/work-2)
+- Handles API requests at /api endpoint
+- CORS enabled for frontend access
+- Resource limits:
+  - Memory: 1Gi (limit), 512Mi (request)
+  - CPU: 500m (limit), 250m (request)
 
-3. **Ingress Configuration** (`ingress.yaml`)
-   - Exposes both frontend and backend services
-   - Configures CORS and path routing
-   - Routes:
-     - `/api/*` -> backend service
-     - `/*` -> frontend service
-   - Hosts:
-     - work-1-abdcoxuzwicybucg.prod-runtime.all-hands.dev
-     - work-2-abdcoxuzwicybucg.prod-runtime.all-hands.dev
+### Ingress Configuration
+- Routes /api/* to the backend service
+- Routes /* to the frontend service
+- Enables CORS headers
+- Supports both work-1 and work-2 environments
 
-## Prerequisites
+## Deployment Instructions
 
-Before deploying:
-1. Build the Docker images for both frontend and backend:
-   ```bash
-   # From repository root
-   docker build -t openhands-backend -f containers/backend/Dockerfile .
-   docker build -t openhands-frontend -f containers/frontend/Dockerfile .
-   ```
-
-2. Ensure your Kubernetes cluster has:
-   - NGINX Ingress Controller installed
-   - Sufficient resources for the deployments
-
-## Deployment
-
-Apply the configurations in the following order:
-
+1. Apply the Kubernetes configurations:
 ```bash
 kubectl apply -f backend-deployment.yaml
 kubectl apply -f frontend-deployment.yaml
 kubectl apply -f ingress.yaml
 ```
 
-## Verification
-
-Check the deployment status:
+2. Verify the deployment:
 ```bash
+# Check pod status
 kubectl get pods -l app=openhands
+
+# Check services
 kubectl get services -l app=openhands
+
+# Check ingress rules
 kubectl get ingress openhands-ingress
+
+# View pod logs
+kubectl logs -l app=openhands -l component=frontend
+kubectl logs -l app=openhands -l component=backend
 ```
 
-## Configuration
-
-The services are configured through environment variables:
-
-### Backend
-- `HOST`: Set to "0.0.0.0" to allow external connections
-- `PORT`: Set to 3000
-
-### Frontend
-- `VITE_BACKEND_HOST`: Points to the backend service
-- `VITE_FRONTEND_PORT`: Set to 3001
-- `HOST`: Set to "0.0.0.0" to allow external connections
+3. Access the application:
+- Frontend: https://work-1-abdcoxuzwicybucg.prod-runtime.all-hands.dev or https://work-2-abdcoxuzwicybucg.prod-runtime.all-hands.dev
+- Backend API: https://work-1-abdcoxuzwicybucg.prod-runtime.all-hands.dev/api or https://work-2-abdcoxuzwicybucg.prod-runtime.all-hands.dev/api

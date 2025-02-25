@@ -19,16 +19,17 @@ spec:
     spec:
       containers:
       - name: backend
-        image: docker.all-hands.dev/all-hands-ai/openhands:0.23
-        command: ["poetry", "run", "uvicorn", "openhands.server.listen:app", "--host", "0.0.0.0", "--port", "3000"]
+        image: ghcr.io/all-hands-ai/openhands:main
+        command: ["poetry", "run", "uvicorn", "openhands.server.listen:app", "--host", "0.0.0.0", "--port", "12000"]
         workingDir: /app
         ports:
-        - containerPort: 3000
+        - containerPort: 12000
+        - containerPort: 12001
         env:
         - name: HOST
           value: "0.0.0.0"
         - name: PORT
-          value: "3000"
+          value: "12000"  # Will be 12000 for work-1 and 12001 for work-2
         resources:
           requests:
             memory: "512Mi"
@@ -47,10 +48,14 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 3000
-    targetPort: 3000
+  - port: 12000
+    targetPort: 12000
     protocol: TCP
-    name: http
+    name: http-work1
+  - port: 12001
+    targetPort: 12001
+    protocol: TCP
+    name: http-work2
   selector:
     app: openhands
     component: backend

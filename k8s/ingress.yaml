@@ -18,14 +18,14 @@ spec:
           service:
             name: openhands-backend-service
             port:
-              number: 3000
+              number: 12000
       - path: /
         pathType: Prefix
         backend:
           service:
             name: openhands-frontend-service
             port:
-              number: 3001
+              number: 12000
   - host: work-2-abdcoxuzwicybucg.prod-runtime.all-hands.dev
     http:
       paths:
@@ -35,11 +35,11 @@ spec:
           service:
             name: openhands-backend-service
             port:
-              number: 3000
+              number: 12001
       - path: /
         pathType: Prefix
         backend:
           service:
             name: openhands-frontend-service
             port:
-              number: 3001
+              number: 12001
