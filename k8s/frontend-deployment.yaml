@@ -6,7 +6,7 @@ metadata:
     app: openhands
     component: frontend
 spec:
-  replicas: 1
+  replicas: 2  # One for each work environment
   selector:
     matchLabels:
       app: openhands
@@ -16,26 +16,30 @@ spec:
       labels:
         app: openhands
         component: frontend
+      annotations:
+        openhands.dev/port: "12000"  # Default to work-1 port
     spec:
       containers:
       - name: frontend
         image: ghcr.io/all-hands-ai/openhands:main
-        command: ["npm", "run", "dev", "--", "--port", "12000", "--host", "0.0.0.0"]
+        command: ["npm", "run", "dev", "--", "--port", "$(PORT)", "--host", "0.0.0.0"]
         workingDir: /app/frontend
         ports:
         - containerPort: 12000
+          name: work1-port
         - containerPort: 12001
+          name: work2-port
         env:
-        - name: VITE_BACKEND_HOST
+        - name: PORT
           valueFrom:
             fieldRef:
-              fieldPath: metadata.namespace
+              fieldPath: metadata.annotations['openhands.dev/port']
+        - name: VITE_BACKEND_HOST
+          value: "openhands-backend-service"
         - name: VITE_BACKEND_PORT
-          value: "12000"  # Will be 12000 for work-1 and 12001 for work-2
-        - name: VITE_FRONTEND_PORT
-          value: "12000"  # Will be 12000 for work-1 and 12001 for work-2
-        - name: HOST
-          value: "0.0.0.0"
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['openhands.dev/port']
         resources:
           requests:
             memory: "256Mi"
@@ -55,11 +59,11 @@ spec:
   type: ClusterIP
   ports:
   - port: 12000
-    targetPort: 12000
+    targetPort: work1-port
     protocol: TCP
     name: http-work1
   - port: 12001
-    targetPort: 12001
+    targetPort: work2-port
     protocol: TCP
     name: http-work2
   selector:
