@@ -257,7 +257,7 @@ class Runtime(FileEditRuntimeMixin):
         if isinstance(observation, NullObservation):
             # don't add null observations to the event stream
             return
-        self.event_stream.add_event(observation, source, method="runtime_observation")  # type: ignore[arg-type]
+        self.event_stream.add_event(observation, source)  # type: ignore[arg-type]
 
     def clone_repo(
         self,

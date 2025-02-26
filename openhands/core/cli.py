@@ -118,13 +118,11 @@ async def main(loop: asyncio.AbstractEventLoop):
             await prompt_for_next_task()
         if next_message == 'exit':
             event_stream.add_event(
-                ChangeAgentStateAction(AgentState.STOPPED), 
-                EventSource.ENVIRONMENT,
-                method="user_exit"
+                ChangeAgentStateAction(AgentState.STOPPED), EventSource.ENVIRONMENT
             )
             return
         action = MessageAction(content=next_message)
-        event_stream.add_event(action, EventSource.USER, method="user_message")
+        event_stream.add_event(action, EventSource.USER)
 
     async def prompt_for_user_confirmation():
         user_confirmation = await loop.run_in_executor(
@@ -146,13 +144,11 @@ async def main(loop: asyncio.AbstractEventLoop):
                     event_stream.add_event(
                         ChangeAgentStateAction(AgentState.USER_CONFIRMED),
                         EventSource.USER,
-                        method="user_confirmed"
                     )
                 else:
                     event_stream.add_event(
                         ChangeAgentStateAction(AgentState.USER_REJECTED),
                         EventSource.USER,
-                        method="user_rejected"
                     )
 
     def on_event(event: Event) -> None:
@@ -164,7 +160,7 @@ async def main(loop: asyncio.AbstractEventLoop):
 
     if initial_user_action:
         # If there's an initial user action, enqueue it and do not prompt again
-        event_stream.add_event(initial_user_action, EventSource.USER, method="initial_task")
+        event_stream.add_event(initial_user_action, EventSource.USER)
     else:
         # Otherwise prompt for the user's first message right away
         asyncio.create_task(prompt_for_next_task())
