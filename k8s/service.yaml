@@ -11,7 +11,7 @@ spec:
     targetPort: 3000
     protocol: TCP
     name: http
-  type: ClusterIP  # Change to LoadBalancer or NodePort based on your needs
+  type: NodePort  # Using NodePort to expose the service externally
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
