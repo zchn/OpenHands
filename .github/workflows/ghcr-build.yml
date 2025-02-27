@@ -361,7 +361,7 @@ jobs:
           REPO: ${{ github.repository }}
           SHORT_SHA: ${{ steps.short_sha.outputs.SHORT_SHA }}
         run: |
-          echo "updating PR description"
+          echo "updating PR description (zchn: do something for the container image below?)"
           DOCKER_RUN_COMMAND="docker run -it --rm \
             -p 3000:3000 \
             -v /var/run/docker.sock:/var/run/docker.sock \
