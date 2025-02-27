@@ -351,6 +351,8 @@ class AgentController:
                 self.event_stream.add_event(
                     MessageAction(content='TASK: ' + action.inputs['task']),
                     EventSource.USER,
+                    parent_event=action,
+                    method='delegate_task',
                 )
                 await self.delegate.set_agent_state_to(AgentState.RUNNING)
             return
@@ -453,17 +455,25 @@ class AgentController:
                 obs = ErrorObservation(content='The action has not been executed.')
                 obs.tool_call_metadata = self._pending_action.tool_call_metadata
                 obs._cause = self._pending_action.id  # type: ignore[attr-defined]
-                self.event_stream.add_event(obs, EventSource.AGENT)
+                self.event_stream.add_event(
+                    obs,
+                    EventSource.AGENT,
+                    parent_event=self._pending_action,
+                    method='error_observation',
+                )
 
         # reset the pending action, this will be called when the agent is STOPPED or ERROR
         self._pending_action = None
         self.agent.reset()
 
-    async def set_agent_state_to(self, new_state: AgentState) -> None:
+    async def set_agent_state_to(
+        self, new_state: AgentState, parent_event: Event | None = None
+    ) -> None:
         """Updates the agent's state and handles side effects. Can emit events to the event stream.
 
         Args:
             new_state (AgentState): The new state to set for the agent.
+            parent_event (Event | None): Optional parent event that triggered this state change.
         """
         self.log(
             'info',
@@ -514,12 +524,19 @@ class AgentController:
                 confirmation_state = ActionConfirmationStatus.REJECTED
             self._pending_action.confirmation_state = confirmation_state  # type: ignore[attr-defined]
             self._pending_action._id = None  # type: ignore[attr-defined]
-            self.event_stream.add_event(self._pending_action, EventSource.AGENT)
+            self.event_stream.add_event(
+                self._pending_action,
+                EventSource.AGENT,
+                parent_event=parent_event,
+                method='agent_action',
+            )
 
         self.state.agent_state = new_state
         self.event_stream.add_event(
             AgentStateChangedObservation('', self.state.agent_state),
             EventSource.ENVIRONMENT,
+            parent_event=parent_event,
+            method='state_change',
         )
 
     def get_agent_state(self) -> AgentState:
@@ -613,7 +630,12 @@ class AgentController:
 
             # emit the delegate result observation
             obs = AgentDelegateObservation(outputs=delegate_outputs, content=content)
-            self.event_stream.add_event(obs, EventSource.AGENT)
+            self.event_stream.add_event(
+                obs,
+                EventSource.AGENT,
+                parent_event=self.delegate._pending_action,
+                method='delegate_success',
+            )
         else:
             # delegate state is ERROR
             # emit AgentDelegateObservation with error content
@@ -626,7 +648,12 @@ class AgentController:
 
             # emit the delegate result observation
             obs = AgentDelegateObservation(outputs=delegate_outputs, content=content)
-            self.event_stream.add_event(obs, EventSource.AGENT)
+            self.event_stream.add_event(
+                obs,
+                EventSource.AGENT,
+                parent_event=self.delegate._pending_action,
+                method='delegate_error',
+            )
 
         # unset delegate so parent can resume normal handling
         self.delegate = None

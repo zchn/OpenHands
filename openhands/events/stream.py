@@ -8,7 +8,7 @@ from functools import partial
 from typing import Callable, Iterable
 
 from openhands.core.logger import openhands_logger as logger
-from openhands.events.event import Event, EventSource
+from openhands.events.event import Event, EventSource, ParentEvent
 from openhands.events.serialization.event import event_from_dict, event_to_dict
 from openhands.io import json
 from openhands.storage import FileStore
@@ -261,7 +261,21 @@ class EventStream:
 
         self._clean_up_subscriber(subscriber_id, callback_id)
 
-    def add_event(self, event: Event, source: EventSource):
+    def add_event(
+        self,
+        event: Event,
+        source: EventSource,
+        parent_event: Event | None = None,
+        method: str | None = None,
+    ):
+        """Add a new event to the stream.
+
+        Args:
+            event: The event to add
+            source: The source of the event (USER, AGENT, etc)
+            parent_event: Optional parent event that triggered this event
+            method: Optional string describing how this event was derived from parent
+        """
         if hasattr(event, '_id') and event.id is not None:
             raise ValueError(
                 f'Event already has an ID:{event.id}. It was probably added back to the EventStream from inside a handler, triggering a loop.'
@@ -269,6 +283,15 @@ class EventStream:
         with self._lock:
             event._id = self._cur_id  # type: ignore [attr-defined]
             self._cur_id += 1
+
+        # Set parent event if provided
+        if parent_event is not None and method is not None:
+            parent = ParentEvent(id=parent_event.id, method=method)
+            if event.parents is None:
+                event.parents = [parent]
+            else:
+                event.parents.append(parent)
+
         logger.debug(f'Adding {type(event).__name__} id={event.id} from {source.name}')
         event._timestamp = datetime.now().isoformat()
         event._source = source  # type: ignore [attr-defined]
