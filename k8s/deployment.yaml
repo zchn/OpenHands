@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: openhands
-        image: docker.all-hands.dev/all-hands-ai/openhands:0.26
+        image: docker.all-hands.dev/all-hands-ai/openhands:0.27
         ports:
         - containerPort: 3000
         envFrom:
