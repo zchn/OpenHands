@@ -12,24 +12,3 @@ spec:
     protocol: TCP
     name: http
   type: NodePort  # Using NodePort to expose the service externally
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: openhands
-  namespace: openhands
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-spec:
-  rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: openhands
-            port:
-              number: 3000
