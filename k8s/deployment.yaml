@@ -35,4 +35,4 @@ spec:
           type: Socket
       - name: openhands-state
         persistentVolumeClaim:
-          claimName: openhands-state-pvc
+          claimName: openhands-states
