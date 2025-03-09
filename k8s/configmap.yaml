@@ -4,7 +4,7 @@ metadata:
   name: openhands-config
   namespace: openhands
 data:
-  SANDBOX_RUNTIME_CONTAINER_IMAGE: "docker.all-hands.dev/all-hands-ai/runtime:0.27-nikolaik"
+  SANDBOX_RUNTIME_CONTAINER_IMAGE: "docker.all-hands.dev/all-hands-ai/runtime:0.28-nikolaik"
   LOG_ALL_EVENTS: "true"
   DEBUG: "1"
   # Add other configuration options as needed
